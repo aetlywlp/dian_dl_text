@@ -177,7 +177,7 @@ nhead = 8  # 多头注意力机制的头数
 num_encoder_layers = 3  # Transformer编码器层数
 dim_feedforward = 512  # 前馈网络的隐藏层维度
 num_classes = 10  # 分类数（Fashion-MNIST 有 10 个类别）
-num_epochs = 5  # 训练轮数
+num_epochs = 8 # 训练轮数
 learning_rate = 0.001  # 学习率
 
 model = TransformerClassifierWithRoPE(input_size, d_model, nhead, num_encoder_layers, dim_feedforward, num_classes).to(

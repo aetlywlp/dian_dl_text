@@ -1,55 +1,55 @@
-import gzip
-import shutil
 import os
+import scipy.io
+import h5py
+import numpy as np
 
+# 1. 指定源目录和目标目录
+source_dir = '/media/aetly/Data/BaiduNetdiskDownload/sEMG_DeepLearning-master/datah5/'
+target_dir = '/media/aetly/Data/BaiduNetdiskDownload/sEMG_DeepLearning-master/datah5/'
 
-def decompress_gz(file_path, output_path):
-    """
-    解压 .gz 文件到指定路径，生成没有 .gz 后缀的文件。
+# 2. 获取源目录下的所有 .mat 文件列表
+mat_files = [f for f in os.listdir(source_dir) if f.endswith('.mat')]
 
-    :param file_path: .gz 文件的完整路径
-    :param output_path: 解压后的文件路径
-    """
-    try:
-        # 确保文件存在
-        if not os.path.isfile(file_path):
-            print(f"文件不存在: {file_path}")
-            return
+# 检查是否找到 .mat 文件
+if not mat_files:
+    print("在指定目录中未找到任何 .mat 文件。")
+else:
+    print(f"在目录 {source_dir} 中找到 {len(mat_files)} 个 .mat 文件。")
 
-        # 检查是否已经解压
-        if os.path.isfile(output_path):
-            print(f"文件已解压: {output_path}")
-            return
+# 3. 遍历每个 .mat 文件并进行转换
+for mat_file in mat_files:
+    # 构建完整的文件路径
+    mat_file_path = os.path.join(source_dir, mat_file)
 
-        # 解压文件
-        with gzip.open(file_path, 'rb') as f_in:
-            with open(output_path, 'wb') as f_out:
-                shutil.copyfileobj(f_in, f_out)
-        print(f"成功解压: {output_path}")
+    # 打印当前处理的文件
+    print(f"正在转换文件: {mat_file_path}")
 
-    except Exception as e:
-        print(f"解压 {file_path} 时出错: {e}")
+    # 4. 加载 .mat 文件
+    mat = scipy.io.loadmat(mat_file_path)
 
+    # 5. 提取所需的数据变量
+    # 请根据实际的变量名替换以下内容
+    # 假设变量名为 'emgData' 和 'emgLabel'
+    if 'emg' in mat and 'restimulus' in mat:
+        emg_data = mat['emg']
+        emg_label = mat['restimulus']
+    else:
+        print(f"文件 {mat_file} 中未找到 'emgData' 或 'emgLabel' 变量，跳过该文件。")
+        continue  # 跳过此文件，继续下一个
 
-def main():
-    # 获取当前脚本所在目录
-    script_dir = os.path.dirname(os.path.abspath(__file__))
+    # 6. 数据类型转换（可选）
+    emg_data = emg_data.astype(np.float32)
+    emg_label = emg_label.astype(np.int64)
 
-    # 构建 raw_dir 的绝对路径
-    raw_dir = os.path.join(script_dir, 'data', 'FashionMNIST', 'raw')
+    # 7. 构建目标 .h5 文件的路径和名称
+    h5_file_name = os.path.splitext(mat_file)[0] + '.h5'
+    h5_file_path = os.path.join(target_dir, h5_file_name)
 
-    # 检查 raw_dir 是否存在
-    if not os.path.isdir(raw_dir):
-        print(f"目录不存在: {raw_dir}")
-        return
+    # 8. 创建并保存 .h5 文件
+    with h5py.File(h5_file_path, 'w') as hf:
+        hf.create_dataset('emg', data=emg_data)
+        hf.create_dataset('restimulus', data=emg_label)
 
-    # 遍历 raw_dir 下的所有文件
-    for file_name in os.listdir(raw_dir):
-        if file_name.endswith('.gz'):
-            file_path = os.path.join(raw_dir, file_name)
-            output_file = os.path.join(raw_dir, file_name[:-3])  # 移除 .gz 后缀
-            decompress_gz(file_path, output_file)
+    print(f"文件 {mat_file} 转换完成，保存为 {h5_file_name}")
 
-
-if __name__ == '__main__':
-    main()
+print("所有文件转换完成。")

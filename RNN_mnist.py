@@ -123,7 +123,7 @@ for epoch in range(num_epochs):
 
         # 反向传播和优化
         optimizer.zero_grad()
-        loss.backward()
+        loss .backward()
         optimizer.step()
 
         # 统计数据

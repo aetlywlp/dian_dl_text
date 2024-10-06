@@ -1,1 +1,3 @@
-this is a text in order to join in dian
+Hello everyone！
+Welcome to the code repository of Ms. Fei Ziben—her home on GitHub.
+This is her Mickey Mouse Clubhouse in college.
